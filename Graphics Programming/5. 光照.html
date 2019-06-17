@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>光照</title>
+    <link rel="stylesheet" href="CSS\/Main.css">
+    <script src="JS/Index05.js"></script>
+	<script src="JS/URL_LINK.js"></script>
+</head>
+<body>
+<div id="Main">
+    <div class="Title">Graphics Programming(五) —— 光照</div>
+    <hr size="2px">
+    <div style="width: 100%; text-align: center">
+        <div style="text-align: left;">计算机图形学第一定律:</div>
+        <span style="color: #a6b9e4; font-weight: bold; font-size: 20px">如果它看起来是对的, 那么它就是对的</span>
+    </div>
+    光照基础
+    <div class="Tab">
+        <span class="Expansion">光源</span>: 发出光线
+        <div class="Tab hidden">
+            表示: 一个点, 用 l 表示其方向
+            <br>
+            拥有五个关键因素: 位置, 方向, 颜色, 强度及<span class="Quote" id="#9">衰减</span>
+            <br>
+            unity分为<span class="Expansion">平行光, 点光源, 聚光灯</span>和面光源(只在烘焙时起作用)
+            <div class="Tab hidden">
+                平行光: 只有方向属性, 到场景中所有点的方向相同, 光强不会因距离而衰减
+                <br>
+                点光源: 有位置属性(方向靠算), 照亮空间为四周呈球形, 光强因距离远近而衰减
+                <br>
+                聚光灯: 有位置属性(方向靠算), 照亮空间为锥形, 光强因距离远近而衰减
+            </div>
+        </div>
+        <br>
+        <span class="Expansion">吸收和散射</span>: 光线与物体相交时, 一部分吸收一部分散射
+        <div class="Tab hidden">
+            散射(scattering): 改变光线方向, 但不改变其性质.
+            <div class="Tab">
+                若散射到物体内部, 称为折射(refraction)或透射(transmission)
+                <br>
+                若散射到物体外表面, 称为反射(reflection)
+            </div>
+            吸收(absorption): 吸收改变性质, 但不改变方向.
+            <br>
+            计量: 出射度(exitance) = β辐射度, β值由材质的漫反射和高光反射来部分决定
+        </div>
+        <br>
+        <span class="Expansion">着色</span>:
+        <div class="Tab hidden">
+            严格的讲(物理): 物体反射特定颜色的光, 该光被接收而感受到颜色
+            <br>
+            定义(图形学): 着色(shading)指根据材质信息, 光源信息来计算沿某个观察方向出射度的<span class="Quote" id="#1">一个等式</span>
+            <br>
+            分为各向同性和各向异性光
+            <div class="Tab">
+                各向同性(isotropic): 参数不变时, 旋转物体反射光不产生变化
+                <br>
+                各向异性(anisotropic): 参数不变时 ,旋转物体反射光产生变化
+            </div>
+        </div>
+    </div>
+    光照模型
+    <div class="Tab">
+        <span class="Expansion">光照计算位置</span>
+        <div class="Tab hidden">
+            逐顶点(per-vertex lighting): 在顶点着色器中计算
+            <div class="Tab">
+                得到法线数据, 然后进行插值计算. 称为Gouraud着色
+                <br>
+                每个顶点计算光照, 会在渲染图元内部进行线性插值, 使得图片"棱角分明", 且容易出错
+            </div>
+            逐像素(per-pixel lighting): 在片元着色器中计算
+            <div class="Tab">
+                得到法线数据, 然后进行插值计算. 称为Phong着色
+            </div>
+        </div>
+        <br>
+        <span class="Expansion">渲染路径</span>
+        <div class="Tab hidden">
+            渲染路径(Rendering Path): 决定光照如何运用到shader中
+            <br>
+            不同渲染路径, shader可以访问的内置变量及函数也不同
+            <table>
+                <tr>
+                    <th colspan="2" style="text-align: center">LightMode的渲染路径选项</th>
+                </tr>
+                <tr>
+                    <td>Always</td>
+                    <td>该Pass总会被渲染, 但不计算任何光照</td>
+                </tr>
+                <tr>
+                    <td>ForwardBase</td>
+                    <td>前向渲染. (计算环境光, 关键平行光, 逐顶点/SH光源和Lightmaps)</td>
+                </tr>
+                <tr>
+                    <td>ForwardAdd</td>
+                    <td>前向渲染. (计算额外的逐像素光源, 每个Pass对应一个光源)</td>
+                </tr>
+                <tr>
+                    <td>Deferred</td>
+                    <td>延迟渲染. (会渲染G-buffer)</td>
+                </tr>
+                <tr>
+                    <td>ShadowCaster</td>
+                    <td>把物体的深度信息渲染到阴影映射纹理(shadowmap)或深度纹理中</td>
+                </tr>
+            </table>
+            <span class="Expansion">前向渲染(Forward)</span>
+            <div class="Tab hidden">
+                该路径指明: 对每个逐像素光源来说, 其中受影响的每个图元, 必需经过"深度缓冲区"和"颜色缓冲区"
+                <br>
+                有三种处理光照的方式: 逐顶点处理, 逐像素处理, 球谐函数(Spherical Harmonics,SH)处理
+                <br>
+                对于场景中所有光源, unity会按<span class="Quote" id="#5">一定规则</span>: 指定一定数目的逐像素光源; 最多4个逐顶点; 剩下的按SH处理
+                <br>
+                其Pass被分为<span class="Imgs" about="@3">Base和Add</span>两种
+                <br>
+                当场景包含大量实时光源时, 前向渲染速度会急速下降
+            </div>
+            <br>
+            <span class="Expansion">延迟渲染</span>
+            <div class="Tab hidden">
+                除"深度缓冲区"和颜色缓冲区外, 延迟渲染将访问<span class="Quote" id="#6">G-buffer</span>, 包含两个Pass
+                <br>
+                第一个Pass不进行光照计算, 仅仅决定片元的可见性(可见信息存储于G-buffer), 每个物体只执行一次
+                <br>
+                第二个利用G-buffer计算光照, <span class="Quote" id="#7">且仅能使用Standard光照模型</span>
+                <br>
+                其不依赖于场景复杂度, 只和使用的屏幕空间大小有关
+                <br>
+                延迟渲染不能使用抗锯齿和处理半透明
+            </div>
+            <br>
+            <span class="Quote" id="#8">选用何种路径?</span>
+            <br>
+            附录: <span class="Imgs" about="@4">常用内置光照变量</span>
+        </div>
+        <br>
+        <span class="Quote" id="#4">标准光照模型</span>:
+        <div class="Tab">
+            标准光照模型只关心光照(direct light). 即直接从光源发射照射到物体后, 经过一次反射直接进入摄像机
+            <br>
+            基本方法: 计算<span class="Expansion">自发光, 高光反射, 漫反射和环境光</span>的<span class="Imgs" about="@1">贡献度</span>, 最后得出SCORE
+            <div class="Tab hidden">
+                环境光(ambient): 用以模拟<span class="Quote" id="#2">间接光照</span>对物体的影响
+                <br>
+                <span class="Quote" id="#3">自发光(emissive)</span>: 直接由光源不经过任何反射进入摄像机
+                <br>
+                <span class="Expansion">漫反射(diffuse)</span>: 用于对被物体表面随机散射到各方向的辐射度进行建模
+                <div class="Tab hidden">
+                    视角的位置是不重要的, 因为反射是完全随机的(近乎于每个方向都是一样的分布); 但入射光线十分重要
+                    <br>
+                    符合兰伯特定理(Lambert's law): 反射光线的强度与表面法线和光源方向之间夹角的余弦值成正比
+                    <br>
+                    也有<span class="Imgs" about="@2">半兰伯特模型</span>: 只是为了增强视觉效果, 没有物理依据
+                </div>
+                <br>
+                <span class="Expansion">高光反射(specular)</span>: 计算沿着完全镜面反射方向反射的光线
+                <div class="Tab hidden">
+                    一种经验模型
+                    <br>
+                    计算时需要知道: 表面法线, 视角方向, 光源方向, 反射方向等单位矢量
+                    <br>
+                    有两种模型: Phong模型和Blinn模型
+                </div>
+            </div>
+        </div>
+        BRDF光照模型(Bidirectional Reflectance Distribution Function)
+        <div class="Tab">
+            BRDF是对真实环境理想化和简化后的模型, 并不能真正的反映物体和光线的交互, 被称为经验模型.
+            <br>
+            当给定模型表面上一点时, BRDF给出其外观的完整描述
+        </div>
+    </div>
+    物体阴影
+    <div class="Tab">
+        物体投影
+        <div class="Tab">
+            将摄像机放置于光源处, 摄像机看不到的地方即是阴影, 然后产生阴影映射纹理(shadowmap)
+            <br>
+            有两种途径: <span class="Expansion">传统途径和屏幕空间阴影映射技术</span>来产生阴影映射纹理
+            <div class="Tab hidden">
+                传统途径: 在正常渲染的Pass中将顶点变换为光源空间得到其xy分量, 利用分量对阴影映射纹理进行采样, 得到阴影映射纹理中该点的深度信息. 之后进行判断, 确定是否为阴影
+                <br>
+                屏幕空间阴影映射技术(Screenspace Shadow Map): 调用设置为 Tags{"LightMode" "ShadowCaster"}的Pass 来得到光源的阴影映射纹理及摄像机的深度纹理. 之后根据
+                前两种纹理来得到屏幕空间的阴影图. 之后用摄影机深度和光源深度, 确定是否为阴影
+            </div>
+            <br>
+            对于透明度混合物体来说, 由于关闭了深度写入, 因此要使用阴影是<span class="Quote" id="#10">很困难的</span>.
+        </div>
+        接收阴影
+        <div class="Tab">
+            通过阴影映射纹理或阴影图采样更改颜色信息
+        </div>
+    </div>
+    <div class="hide" id="fullScreen">
+        <img class="hide imgMode" src="" id="@1">
+        <img class="hide imgMode" src="" id="@2">
+        <img class="hide imgMode" src="" id="@3">
+        <img class="hide imgMode" src="" id="@4">
+    </div>
+    <div id="Quote"></div>
+</div>
+</body>
+<script src="JS/Main.js"></script>
+</html>

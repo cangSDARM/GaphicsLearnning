@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>前置知识</title>
+    <link rel="stylesheet" href="CSS\/Main.css">
+    <script src="JS/Index02.js"></script>
+	<script src="JS/URL_LINK.js"></script>
+</head>
+<body>
+<div id="Main">
+    <div class="Title">Graphics Programming(二) —— 前置知识</div>
+    <hr size="2px">
+	shader作用:
+		<div class="Tab">
+			决定"材质"和"灯光"如何相互作用
+		</div>
+	<br>
+    shader语言:
+    <br>
+    <div class="Tab">
+        OpenGL
+		<div class="Tab">
+			<span class="Quote" id="#1">GLSL</span>: opengl shader lauguage
+		</div>
+		DiretX
+		<div class="Tab">
+			<span class="Quote" id="#2">HLSL</span>: high level shader lauguage
+		</div>
+		CG
+		<div class="Tab">
+			<span class="Quote" id="#3">CG</span>: C of Graphic
+		</div>
+		Unity
+		<div class="Tab">
+			ShaderLab
+		</div>
+    </div>
+	unity shader
+    <br>
+    <div class="Tab">
+		<span class="Expansion">shader版本</span>:
+		<div class="Tab hidden">
+			fixed function shader:
+			<div class="Tab">
+				shader 1.0
+				开关式, 不可控制
+			</div>
+			shader 2.0:
+			<div class="Tab">
+				功能可定制
+			</div>
+			surface shader:
+			<div class="Tab">
+				前两个的封装
+			</div>
+		</div>
+		<br>
+		<span class="Expansion">shader分类</span>:
+		<div class="Tab hidden">
+			<table>
+				<tr>
+					<th>Standard Surface Shader</th>
+					<td>包含了标准光照模型(基于物理的渲染)的表面着色器模板</td>
+				</tr>
+				<tr>
+					<th>Unlit Shader</th>
+					<td>不包含光照(但有雾效)的基本顶点/片元着色器</td>
+				</tr>
+				<tr>
+					<th>Image Effect Shader</th>
+					<td>包含各种屏幕后期处理效果的基本模板</td>
+				</tr>
+				<tr>
+					<th><span class="Quote" id="#4">Compute Shader</span></th>
+					<td>包含利用GPU的并行性来经行与常规流水线无关的计算</td>
+				</tr>
+			</table>
+		</div>
+		<br>
+		<span class="Expansion">shader导入面版</span>:
+		<div class="Tab hidden">
+			Defalut Maps: 指定默认纹理
+			<br>
+			Compile and show code: 显示对于不同接口生成的代码和最终生成的汇编指令
+			<br>
+			Show generated code: 显示顶点/片元着色器代码
+		</div>
+	</div>
+	
+    <div id="Quote"></div>
+</div>
+</body>
+<script src="JS/Main.js"></script>
+</html>

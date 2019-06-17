@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>shader3.0</title>
+    <link rel="stylesheet" href="CSS/Main.css">
+	<script src="JS/URL_LINK.js"></script>
+	<style type="text/css">
+		.Title{
+			display: inline-block;
+		}
+		.Quote:before, .Quote:after{
+			content: none;
+		}
+		th, td{
+			width: 300px;
+			text-align: center;
+		}
+		.Large{
+			font-size: 20px;
+			background-color: #575767;
+		}
+		.Color{
+			background-color: #727288;
+			border-bottom: 1px solid #EEE;
+		}
+	</style>
+</head>
+<body>
+<div id="Main">
+    <span class="Scale" href="3. Shader基础结构和部分语法.html">返回</span><div class="Title">表面着色器: Surface Shader</div>
+    <hr class="Unreplace" size="2px">
+    -------------------------是Unity自己创造的着色器代码类型. 需要的代码量很少, 但渲染代价较大-------------------------
+	<br>
+	---------------------------本质上是将其转换为顶点片元着色器运行, 是对顶点片元着色器的封装---------------------------
+		<div class="Tab">
+		SubShader{
+			<div class="Tab">
+			//表面着色器被定义在SubShdaer块(而非Pass块)
+			<br>
+			<br>
+			CGPROGRAM
+			<br>
+			#pragma surface surf Lambert
+			<br>
+			struct Input{
+			<br>
+			};
+			<br>
+			<br>
+			void surf(Input IN, inout SurfaceOutput o){
+			<br>
+			}
+			<br>
+			ENDCG
+			</div>
+		}
+		</div>
+    <div id="Quote"></div>
+</div>
+</body>
+<script>
+var quoteList = [
+	"unity标准的struct:  \\Unity\\Editor\\Data\\CGIncludes\\中 appdata_tan, appdata_base, appdata_full"
+];
+</script>
+<script src="JS/Main.js"></script>
+</html>

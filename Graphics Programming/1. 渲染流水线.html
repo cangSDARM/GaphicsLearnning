@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>渲染流水线</title>
+    <link rel="stylesheet" href="CSS\/Main.css">
+    <script src="JS/Index.js"></script>
+    <script src="JS/URL_LINK.js"></script>
+</head>
+<body>
+<div id="Main">
+    <div class="Title">Graphics Programming(一) —— 渲染流水线</div>
+    <hr size="2px">
+    <span class="Quote" id="#12">现代渲染管线</span>分为三个主要阶段:
+    <br>
+    <br>
+    <div class="Tab">
+        <a href="#Application">应用程序阶段</a> --> <a href="#Geometry">几何阶段</a> --> <a href="#Rasterizer">光栅阶段</a>
+    </div>
+    <br>
+    <b id="Application">应用程序阶段:</b>
+    <div class="Tab">
+        主要和CPU,内存打交道. 该阶段末端, 渲染所需的数据(渲染图元rendering primitives)通过<span class="Quote" id="#1">数据总线</span>传送到GPU
+        <br>
+        1. 将渲染图元读取到显存中: 从硬盘HDD --> 内存RAM --> 显存VRAM
+        <br>
+        2. <span class="Expansion">确定网格怎样被渲染</span>
+		<div class="Tab hidden">
+            在Unity中, 通常是使用MeshRender来将信息传递给GPU.
+			<br>
+			特别的, 在3D模型中:
+			<div class="Tab">
+				skin mesh render: 带蒙皮的骨骼
+				<br>
+				mesh filter/ mesh render: 将哪个mesh信息传递给GPU/ 没有骨骼的模型
+			</div>
+		</div>
+        <br>
+        3. <span class="Quote Expansion" id="#11">调用Draw Call</span>: CPU 通知 GPU 渲染
+		<div class="Tab hidden">
+			CPU向一个队列"命令缓冲区"push命令, 而GPU从其中pull命令. 这样实现了CPU和GPU的并行工作
+			<br>
+			通常性能的优化都会减少Draw Call的个数
+		</div>
+	</div>
+    <b id="Geometry">几何阶段:</b>
+    <div class="Tab">
+        主要和GPU打交道. 该阶段末端, 得到经过变换和投影之后的顶点坐标, 颜色及纹理坐标
+        <br>
+        1. <span class="Expansion">顶点着色器</span>: 实现顶点空间变换, 顶点着色, 光照等(可编程)
+        <div class="Tab hidden">
+            它的输入来自于CPU. 每个顶点都会调用一次顶点着色器.
+            <br>
+            顶点着色器本身本可以创建和销毁任何顶点, 而且<span class="Quote" id="#6">顶点顶点之间是相互独立的</span>.
+            <br>
+            它最基本且必须完成的工作是: 将顶点坐标从 模型空间 转换到 <span class="Quote" id="#7">齐次裁剪坐标系</span> 下.
+        </div>
+        <br>
+        2. <span class="Expansion">曲面细分着色器</span>: 用于细分图元(可选着色器, 可编程)
+        <div class="Tab hidden">很遗憾, 此部分并没有学到.</div>
+        <br>
+        3. <span class="Expansion">几何着色器</span>: 执行逐图元的着色(Per-Primitive)或产生更多图元(可选着色器, 可编程)
+        <div class="Tab hidden">很遗憾, 此部分并没有学到.</div>
+        <br>
+        4. <span class="Expansion">裁剪</span>:<span class="Quote" id="#2">视锥裁剪</span>(可配置)
+        <div class="Tab hidden">
+            确认视锥(即选择投影类型)并裁剪
+            <br>
+            裁剪并不一定是通过GPU来运算. 也可以<span class="Quote" id="#8">通过CPU运算</span>后直接跳过该步骤.
+        </div>
+        <br>
+        5. <span class="Expansion">屏幕映射</span>: 将CVV 转换为Clip and Project space
+        <div class="Tab hidden">
+            屏幕映射(Screen Mapping)并不会处理深度值Z.
+            <br>
+            值得注意的是, OpenGL的坐标系将"屏幕的左下角"当作原点(0,0); 而DirectX的坐标系将"屏幕的左上角"当作原点(0,0)
+        </div>
+        <br>
+        附录: <span class="Expansion Quote" id="#13">坐标空间</span>: 依照先后顺序
+        <div class="Tab hidden">
+                        Object space物体坐标系
+                        <span class="Quote" id="#3">--></span>
+                        World space世界坐标系
+                        <span class="Quote" id="#4">--></span>
+                        View space观察坐标系
+                        <span class="Quote" id="#5">--></span>
+                        Project space屏幕坐标系
+                        <table>
+                            <tr>
+                                <th>Object space</th>
+                                <td> 模型建立时得到的坐标. 与其它物体没有任何参照关系</td>
+                            </tr>
+                            <tr>
+                                <th>World space</th>
+                                <td>以一个固定的坐标原点经行参照确定物体位置</td>
+                            </tr>
+                            <tr>
+                                <th>View space</th>
+                                <td>以Camera为原点, 组成的正交坐标系</td>
+                            </tr>
+                            <tr>
+                                <th>Project space</th>
+                                <td>屏幕坐标系</td>
+                            </tr>
+                        </table>
+                    </div>
+    </div>
+    <b id="Rasterizer">光栅阶段:</b>
+    <div class="Tab">
+        基于几何阶段输出的数据, 雾化, 透明及为pixel正确配色. 经行单个像素的操作, 每个pixel的信息存储在颜色缓冲器(color buffer 或frame buffer)中
+        <br>
+        1. <span class="Expansion">三角形设置</span>: 计算光栅化一个三角网格所需的信息
+        <div class="Tab hidden">
+            上一阶段输出的是"三角网格的顶点"即每条边的两个端点. 如果需要得到三角网格对pixel的覆盖情况, 需要计算每条边的像素坐标.
+            <br>
+            三角形设置(Triangle Setup)通过计算三角形边界的表示形式来确定每条边的坐标
+        </div>
+        <br>
+        2. <span class="Expansion">三角形遍历</span>
+        <div class="Tab hidden">
+            <span class="Quote" id="#9">三角形遍历</span>(Triangle Traversal)确定每个三角网格所覆盖的pixel, 并使用顶点信息对覆盖区域进行差值
+            <br>
+            遍历完成后的输出就称之为片元(fragment), 包含了深度值Z, 法线, 纹理等信息, 可以说是"收集完全但未计算的像素信息"
+        </div>
+        <br>
+        3. <span class="Expansion">片元着色器</span>: 实现逐片元的着色(Per-Fragment)(可编程)
+        <div class="Tab hidden">
+            这一阶段包含许多的渲染技术. 最重要的就是纹理采样(将贴图, 法线等颜色信息给片元)
+            <br>
+            但它仅能影响单个片元, 无法将结果发送给它周围的pixel.(法线信息除外)
+        </div>
+        <br>
+        4. <span class="Expansion">逐片元操作</span>: 片元的可见性, 深度缓冲, 颜色混合等(可配置)
+        <div class="Tab hidden">
+            在OpenGL中称为逐片元操作(Per-Fragment Operations), 在DirectX中称为输出合并阶段(Output-Merger)
+            <br>
+            需要经过<span class="Expansion Quote" id="#10">两个测试</span>, 来决定片元的可见性问题
+            <div class="Tab hidden">
+                模板测试 --> 深度测试
+                <table>
+                    <tr>
+                        <th>模板测试</th>
+                        <td>通常用于限制渲染的区域. 也可以用来渲染阴影, 轮廓渲染等</td>
+                    </tr>
+                    <tr>
+                        <th>深度测试</th>
+                        <td>通常用于视野深度计算</td>
+                    </tr>
+                </table>
+            </div>
+            <br>
+            之后需要经行混合(Blend)操作, 决定此次操作和前一次操作的关系(实现不透明(全覆盖)或半透明(局部覆盖))
+        </div>
+        <br>
+        5. <span class="Expansion">屏幕图像</span>
+        <div class="Tab hidden">
+            使用通常所说的双缓冲技术(Double Buffering). 前置缓冲(front buffer)和后置缓冲(frame buffer|back buffer)交替显示
+        </div>
+        <br>
+    </div>
+    <div id="Quote"></div>
+</div>
+</body>
+<script src="JS/Main.js"></script>
+</html>

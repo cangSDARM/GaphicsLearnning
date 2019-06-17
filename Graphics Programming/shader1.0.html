@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>shader1.0</title>
+    <link rel="stylesheet" href="CSS\/Main.css">
+	<script src="JS/URL_LINK.js"></script>
+	<style type="text/css">
+		.Title{
+			display: inline-block;
+		}
+	</style>
+</head>
+<body>
+<div id="Main">
+    <span class="Scale" href="3. Shader基础结构和部分语法.html">返回</span><div class="Title">固定函数着色器: Fixed Function Shader</div>
+    <hr class="Unreplace" size="2px">
+	------------在5.3以后, 所有的固定函数着色器都被编译为顶点片元着色器. 实际上的Fixed Function Shader已经不存在--------
+	---------------------------对于固定函数着色器, 必须严格使用ShdaerLab的语法. CG/HLSL不支持----------------------
+	<br>
+    --------------------------------------------------------------------------------------------------------
+	<br>
+    ------------------------------------------------顶点着色器------------------------------------------------
+	<br>
+    -----------------------------------------计算顶点颜色, 灯光效果控制-----------------------------------------
+	<div class="Tab">
+		灯光计算公式:
+		<br>
+		<div class="Tab">
+		(Ambient * Lighting Window's Ambient Intensity setting) + [Light Color * (Diffuse + Specular)] + Emission
+		<br>
+		(环境光 * 窗口中的环境光设置) + [灯光颜色 * (漫反射光 + 镜面反射光)] + 自发光
+		</div>
+		<br>
+		SubShader{
+			<div class="Tab">
+			Pass{
+				<div class="Tab">
+				//调节顶点颜色
+				<br>
+				Color (1, 0, 0, 1)
+				<br>
+				<br>
+				//所有的光效果. 默认Off
+				<br>
+				Lighting On
+				<br>
+				<br>
+				//镜面反射光(高光)
+				<br>
+				SeparateSpecular On
+				<br>
+				<br>
+				//灯光效果调节
+				<br>
+				Meterial{
+					<div class="Tab">
+					Diffuse(1, 1, 1, 1)
+					Ambient[property]
+					</div>
+				}
+				</div>
+			}
+			</div>
+		}
+	</div>
+    ------------------------------------------------片元着色器------------------------------------------------
+	<br>
+	-------------------------------------------------纹理采样-------------------------------------------------
+	<br>
+	<div class="Tab">
+		纹理处理:
+			<div class="Tab">
+				按 等比例 映射
+				<br>
+				Point : 点集映射(多余的丢弃)
+				<br>
+				Bilinear : 上中下左右平均采样
+				<br>
+				Trilinear: 周围共九个平均采样
+			</div>
+		SubShader{
+			<div class="Tab">
+			Pass{
+				<div class="Tab">
+				//设置纹理
+				<br>
+				SetTexture [纹理名字] {
+					<div class="Tab">
+					//纹理运算
+					<br>
+					//	Previous: 前一个SetTexture的纹理
+					<br>
+					//	Primary : 顶点的颜色
+					<br>
+					//	Texture : 当前SetTexture的纹理
+					<br>
+					//	Constant: constantColor的颜色
+					<br>
+					constantColor (1, 0, 0, 1)
+					<br>
+					combine Previous + Primary * Texture - Constant
+					<br>
+					<br>
+					//通过C的alpha值来混合A和B
+					<br>
+					//公式:	(1 - α)A + αB
+					<br>
+					combine A Lerp(C) B
+					</div>
+				}
+				</div>
+			}
+			</div>
+		}
+	</div>
+    <div id="Quote"></div>
+</div>
+</body>
+<script src="JS/Main.js"></script>
+</html>
